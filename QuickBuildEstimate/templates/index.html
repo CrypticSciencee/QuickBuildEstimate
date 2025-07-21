@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}New Estimate - QuickBuild Estimate{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card bg-secondary border-0 shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0">
+                    <i data-feather="file-plus" class="me-2"></i>
+                    Create New Estimate
+                </h2>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">
+                    Upload your blueprint PDF and cost data CSVs to generate a professional construction estimate in under 15 seconds.
+                </p>
+
+                <form method="POST" action="{{ url_for('create_estimate') }}" enctype="multipart/form-data" id="estimateForm">
+                    <!-- Project Name -->
+                    <div class="mb-4">
+                        <label for="estimate_name" class="form-label fw-bold">Project Name</label>
+                        <input type="text" class="form-control" id="estimate_name" name="estimate_name" 
+                               placeholder="Enter project name (e.g., Smith Residence)" required>
+                    </div>
+
+                    <!-- File Upload Section -->
+                    <div class="row">
+                        <!-- Blueprint Upload -->
+                        <div class="col-md-4 mb-4">
+                            <label class="form-label fw-bold">
+                                <i data-feather="file-text" class="me-1"></i>
+                                Blueprint PDF
+                            </label>
+                            <div class="dropzone" id="blueprintDropzone">
+                                <input type="file" class="form-control" name="blueprint" accept=".pdf" required>
+                                <div class="dropzone-content">
+                                    <i data-feather="upload-cloud" class="dropzone-icon"></i>
+                                    <p class="mb-1">Drop PDF here or click to browse</p>
+                                    <small class="text-muted">Max file size: 16MB</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Materials CSV Upload -->
+                        <div class="col-md-4 mb-4">
+                            <label class="form-label fw-bold">
+                                <i data-feather="package" class="me-1"></i>
+                                Materials CSV
+                            </label>
+                            <div class="dropzone" id="materialsDropzone">
+                                <input type="file" class="form-control" name="materials" accept=".csv" required>
+                                <div class="dropzone-content">
+                                    <i data-feather="upload-cloud" class="dropzone-icon"></i>
+                                    <p class="mb-1">Drop CSV here or click to browse</p>
+                                    <small class="text-muted">Materials & supplies data</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Labor CSV Upload -->
+                        <div class="col-md-4 mb-4">
+                            <label class="form-label fw-bold">
+                                <i data-feather="users" class="me-1"></i>
+                                Labor CSV
+                            </label>
+                            <div class="dropzone" id="laborDropzone">
+                                <input type="file" class="form-control" name="labor" accept=".csv" required>
+                                <div class="dropzone-content">
+                                    <i data-feather="upload-cloud" class="dropzone-icon"></i>
+                                    <p class="mb-1">Drop CSV here or click to browse</p>
+                                    <small class="text-muted">Labor costs & hours</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                            <i data-feather="zap" class="me-2"></i>
+                            Generate Estimate
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Progress Indicator (hidden by default) -->
+                <div id="progressContainer" class="mt-4" style="display: none;">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border text-primary me-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div>
+                            <p class="mb-1">Processing your files...</p>
+                            <small class="text-muted" id="progressText">Analyzing blueprint with AI vision</small>
+                        </div>
+                    </div>
+                    <div class="progress mt-2">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%" id="progressBar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="card bg-secondary border-0 shadow mt-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i data-feather="help-circle" class="me-2"></i>
+                    File Format Guidelines
+                </h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6 class="text-primary">Blueprint PDF</h6>
+                        <ul class="small text-muted">
+                            <li>Construction drawings or floor plans</li>
+                            <li>Clear room dimensions preferred</li>
+                            <li>Single or multi-page supported</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-primary">Materials CSV</h6>
+                        <ul class="small text-muted">
+                            <li>Include: name, quantity, unit, cost</li>
+                            <li>Bundle/package groupings optional</li>
+                            <li>Category classification helpful</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-primary">Labor CSV</h6>
+                        <ul class="small text-muted">
+                            <li>Include: task, hours, hourly rate</li>
+                            <li>Labor category classification</li>
+                            <li>Detailed task descriptions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('estimateForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+
+    // Handle form submission
+    form.addEventListener('submit', function(e) {
+        // Show progress indicator
+        submitBtn.disabled = true;
+        progressContainer.style.display = 'block';
+        
+        // Simulate progress steps
+        const steps = [
+            { text: 'Uploading files...', progress: 20 },
+            { text: 'Analyzing blueprint with AI vision...', progress: 40 },
+            { text: 'Detecting CSV schema...', progress: 60 },
+            { text: 'Calculating costs...', progress: 80 },
+            { text: 'Finalizing estimate...', progress: 100 }
+        ];
+        
+        let currentStep = 0;
+        const stepInterval = setInterval(() => {
+            if (currentStep < steps.length) {
+                const step = steps[currentStep];
+                progressText.textContent = step.text;
+                progressBar.style.width = step.progress + '%';
+                currentStep++;
+            } else {
+                clearInterval(stepInterval);
+            }
+        }, 1500);
+    });
+
+    // Setup dropzone functionality
+    setupDropzone('blueprintDropzone');
+    setupDropzone('materialsDropzone');
+    setupDropzone('laborDropzone');
+});
+
+function setupDropzone(dropzoneId) {
+    const dropzone = document.getElementById(dropzoneId);
+    const input = dropzone.querySelector('input[type="file"]');
+    const content = dropzone.querySelector('.dropzone-content');
+
+    // Click to browse
+    dropzone.addEventListener('click', function(e) {
+        if (e.target !== input) {
+            input.click();
+        }
+    });
+
+    // File selection
+    input.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            const file = this.files[0];
+            content.innerHTML = `
+                <i data-feather="check-circle" class="dropzone-icon text-success"></i>
+                <p class="mb-1 text-success">${file.name}</p>
+                <small class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+            `;
+            feather.replace();
+            dropzone.classList.add('success');
+        }
+    });
+
+    // Drag and drop
+    dropzone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            input.files = files;
+            input.dispatchEvent(new Event('change'));
+        }
+    });
+}
+</script>
+{% endblock %}

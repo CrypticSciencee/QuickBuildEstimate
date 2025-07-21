@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}{{ estimate.name }} - QuickBuild Estimate{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">{{ estimate.name }}</h1>
+        <small class="text-muted">Created {{ estimate.created_at.strftime('%B %d, %Y at %I:%M %p') }}</small>
+    </div>
+    <div>
+        <a href="{{ url_for('history') }}" class="btn btn-outline-secondary me-2">
+            <i data-feather="arrow-left" class="me-1"></i>
+            Back to History
+        </a>
+        <a href="{{ url_for('download_proposal', estimate_id=estimate.id) }}" class="btn btn-success">
+            <i data-feather="download" class="me-1"></i>
+            Download Proposal
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+        <!-- Blueprint Analysis -->
+        <div class="card bg-secondary border-0 shadow mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="eye" class="me-2"></i>
+                    Blueprint Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                {% set areas = estimate.get_areas() %}
+                {% if areas %}
+                <div class="row">
+                    {% for area in areas %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card bg-dark border-secondary">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ area.room }}</h6>
+                                <p class="card-text">
+                                    <span class="badge bg-primary">{{ area.category }}</span>
+                                </p>
+                                <p class="h5 text-success mb-0">{{ area.area_ft2|int }} sq ft</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-3 p-3 bg-dark rounded">
+                    <strong>Total Area: {{ areas|sum(attribute='area_ft2')|int }} sq ft</strong>
+                </div>
+                {% else %}
+                <p class="text-muted">No areas detected in blueprint.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Bundle Toggles -->
+        <div class="card bg-secondary border-0 shadow mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="toggle-right" class="me-2"></i>
+                    Material Bundles
+                </h5>
+            </div>
+            <div class="card-body">
+                {% set detected_bundles = estimate.get_detected_bundles() %}
+                {% set active_bundles = estimate.get_active_bundles() %}
+                
+                {% if detected_bundles %}
+                <div class="row">
+                    {% for bundle in detected_bundles %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <form method="POST" action="{{ url_for('toggle_bundle', estimate_id=estimate.id) }}" class="d-inline">
+                            <input type="hidden" name="bundle_name" value="{{ bundle }}">
+                            <div class="card bg-dark border-secondary">
+                                <div class="card-body d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title mb-1">{{ bundle }}</h6>
+                                        <small class="text-muted">Material Package</small>
+                                    </div>
+                                    <button type="submit" class="btn btn-sm {{ 'btn-success' if bundle in active_bundles else 'btn-outline-secondary' }}">
+                                        <i data-feather="{{ 'check' if bundle in active_bundles else 'plus' }}"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No material bundles detected.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Cost Summary -->
+        <div class="card bg-secondary border-0 shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i data-feather="dollar-sign" class="me-2"></i>
+                    Cost Summary
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between py-2">
+                    <span>Subtotal:</span>
+                    <span>${{ "%.2f"|format(estimate.subtotal) }}</span>
+                </div>
+                <div class="d-flex justify-content-between py-2">
+                    <span>Profit ({{ estimate.profit_percentage }}%):</span>
+                    <span>${{ "%.2f"|format(estimate.profit_amount) }}</span>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom">
+                    <span>Contingency ({{ estimate.contingency_percentage }}%):</span>
+                    <span>${{ "%.2f"|format(estimate.contingency_amount) }}</span>
+                </div>
+                <div class="d-flex justify-content-between py-3">
+                    <strong>Grand Total:</strong>
+                    <strong class="text-success h5">${{ "%.2f"|format(estimate.grand_total) }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="card bg-secondary border-0 shadow mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="settings" class="me-2"></i>
+                    Estimate Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('update_estimate_settings', estimate_id=estimate.id) }}">
+                    <div class="mb-3">
+                        <label for="profit_percentage" class="form-label">Profit Percentage</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="profit_percentage" 
+                                   name="profit_percentage" value="{{ estimate.profit_percentage }}" 
+                                   min="0" max="100" step="0.1">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contingency_percentage" class="form-label">Contingency</label>
+                        <select class="form-select" id="contingency_percentage" name="contingency_percentage">
+                            <option value="5" {{ 'selected' if estimate.contingency_percentage == 5 }}>Low (5%)</option>
+                            <option value="10" {{ 'selected' if estimate.contingency_percentage == 10 }}>Medium (10%)</option>
+                            <option value="15" {{ 'selected' if estimate.contingency_percentage == 15 }}>High (15%)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i data-feather="refresh-cw" class="me-1"></i>
+                        Update Totals
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card bg-secondary border-0 shadow">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="tool" class="me-2"></i>
+                    Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <a href="{{ url_for('duplicate_estimate', estimate_id=estimate.id) }}" 
+                   class="btn btn-outline-primary w-100 mb-2">
+                    <i data-feather="copy" class="me-1"></i>
+                    Duplicate Estimate
+                </a>
+
+                <form method="POST" action="{{ url_for('delete_estimate', estimate_id=estimate.id) }}" 
+                      onsubmit="return confirm('Are you sure you want to delete this estimate? This action cannot be undone.');">
+                    <button type="submit" class="btn btn-outline-danger w-100">
+                        <i data-feather="trash-2" class="me-1"></i>
+                        Delete Estimate
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-refresh totals every 30 seconds
+setInterval(function() {
+    // Could implement AJAX refresh here if needed
+}, 30000);
+
+// Add confirmation for bundle toggles
+document.querySelectorAll('form[action*="toggle_bundle"]').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        const bundleName = this.querySelector('input[name="bundle_name"]').value;
+        const button = this.querySelector('button');
+        const isActive = button.classList.contains('btn-success');
+        
+        const action = isActive ? 'disable' : 'enable';
+        if (!confirm(`Are you sure you want to ${action} the "${bundleName}" bundle?`)) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

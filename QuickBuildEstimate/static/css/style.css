@@ -1,0 +1,385 @@
+/* QuickBuild Estimate - Custom Dark Theme Styles */
+
+:root {
+    --primary-color: #1C1C1E;
+    --secondary-color: #2C2C2E;
+    --accent-color: #007AFF;
+    --success-color: #30D158;
+    --warning-color: #FF9F0A;
+    --danger-color: #FF453A;
+    --light-text: #FFFFFF;
+    --muted-text: #8E8E93;
+    --border-color: #38383A;
+}
+
+/* Base theme overrides */
+body {
+    background-color: var(--primary-color) !important;
+    color: var(--light-text) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Bootstrap theme customizations */
+.bg-primary {
+    background-color: var(--accent-color) !important;
+}
+
+.bg-secondary {
+    background-color: var(--secondary-color) !important;
+}
+
+.bg-dark {
+    background-color: var(--primary-color) !important;
+}
+
+.text-primary {
+    color: var(--accent-color) !important;
+}
+
+.text-success {
+    color: var(--success-color) !important;
+}
+
+.text-muted {
+    color: var(--muted-text) !important;
+}
+
+/* Card styling */
+.card {
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(20px);
+}
+
+.card-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Navigation */
+.navbar-dark .navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: color 0.2s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: rgba(255, 255, 255, 1) !important;
+}
+
+/* Dropzone Styling */
+.dropzone {
+    position: relative;
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.02);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropzone:hover {
+    border-color: var(--accent-color);
+    background-color: rgba(0, 122, 255, 0.05);
+}
+
+.dropzone.dragover {
+    border-color: var(--accent-color);
+    background-color: rgba(0, 122, 255, 0.1);
+    transform: scale(1.02);
+}
+
+.dropzone.success {
+    border-color: var(--success-color);
+    background-color: rgba(48, 209, 88, 0.05);
+}
+
+.dropzone input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.dropzone-content {
+    text-align: center;
+    pointer-events: none;
+}
+
+.dropzone-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 8px;
+    color: var(--muted-text);
+}
+
+.dropzone:hover .dropzone-icon {
+    color: var(--accent-color);
+}
+
+.dropzone.success .dropzone-icon {
+    color: var(--success-color);
+}
+
+/* Button enhancements */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #0056CC;
+    border-color: #0056CC;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.btn-success:hover,
+.btn-success:focus {
+    background-color: #28A745;
+    border-color: #28A745;
+    transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+/* Form styling */
+.form-control,
+.form-select {
+    background-color: var(--primary-color);
+    border-color: var(--border-color);
+    color: var(--light-text);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--primary-color);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 122, 255, 0.25);
+    color: var(--light-text);
+}
+
+.form-control::placeholder {
+    color: var(--muted-text);
+}
+
+/* Table styling */
+.table-dark {
+    --bs-table-bg: var(--secondary-color);
+    --bs-table-border-color: var(--border-color);
+}
+
+.table-dark thead th {
+    background-color: var(--accent-color) !important;
+    border-color: var(--border-color);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Badge styling */
+.badge {
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+.badge.bg-primary {
+    background-color: var(--accent-color) !important;
+}
+
+.badge.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.badge.bg-info {
+    background-color: #64D2FF !important;
+}
+
+.badge.bg-warning {
+    background-color: var(--warning-color) !important;
+}
+
+/* Progress bar */
+.progress {
+    background-color: var(--secondary-color);
+    border-radius: 6px;
+}
+
+.progress-bar {
+    background-color: var(--accent-color);
+}
+
+/* Alert styling */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.alert-success {
+    background-color: rgba(48, 209, 88, 0.1);
+    color: var(--success-color);
+}
+
+.alert-danger {
+    background-color: rgba(255, 69, 58, 0.1);
+    color: var(--danger-color);
+}
+
+/* Spinner */
+.spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Footer */
+footer {
+    background-color: var(--secondary-color) !important;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--primary-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-text);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .dropzone {
+        min-height: 100px;
+    }
+    
+    .dropzone-content p {
+        font-size: 0.9rem;
+    }
+    
+    .btn {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    .card-title {
+        font-size: 1.1rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    body {
+        background-color: white !important;
+        color: black !important;
+    }
+    
+    .navbar,
+    .btn,
+    footer {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+    }
+}
+
+/* Accessibility improvements */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: #666;
+        --muted-text: #AAA;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

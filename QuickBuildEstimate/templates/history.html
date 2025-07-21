@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Estimate History - QuickBuild Estimate{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">
+        <i data-feather="clock" class="me-2"></i>
+        Estimate History
+    </h1>
+    <a href="{{ url_for('index') }}" class="btn btn-primary">
+        <i data-feather="plus-circle" class="me-1"></i>
+        New Estimate
+    </a>
+</div>
+
+{% if estimates %}
+<div class="card bg-secondary border-0 shadow">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0">
+                <thead class="bg-primary">
+                    <tr>
+                        <th>Project Name</th>
+                        <th>Date Created</th>
+                        <th>Total Area</th>
+                        <th>Active Bundles</th>
+                        <th>Grand Total</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for estimate in estimates %}
+                    {% set areas = estimate.get_areas() %}
+                    {% set active_bundles = estimate.get_active_bundles() %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i data-feather="file-text" class="me-2 text-primary"></i>
+                                <div>
+                                    <div class="fw-bold">{{ estimate.name }}</div>
+                                    <small class="text-muted">ID: {{ estimate.id }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div>{{ estimate.created_at.strftime('%m/%d/%Y') }}</div>
+                            <small class="text-muted">{{ estimate.created_at.strftime('%I:%M %p') }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">
+                                {{ areas|sum(attribute='area_ft2')|int if areas else 0 }} sq ft
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for bundle in active_bundles[:3] %}
+                                <span class="badge bg-success">{{ bundle }}</span>
+                                {% endfor %}
+                                {% if active_bundles|length > 3 %}
+                                <span class="badge bg-secondary">+{{ active_bundles|length - 3 }} more</span>
+                                {% endif %}
+                                {% if not active_bundles %}
+                                <span class="text-muted">None</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-success">
+                                ${{ "%.2f"|format(estimate.grand_total) }}
+                            </div>
+                            <small class="text-muted">
+                                {{ estimate.profit_percentage }}% profit, {{ estimate.contingency_percentage }}% contingency
+                            </small>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('view_estimate', estimate_id=estimate.id) }}" 
+                                   class="btn btn-sm btn-outline-primary" title="View Details">
+                                    <i data-feather="eye"></i>
+                                </a>
+                                <a href="{{ url_for('download_proposal', estimate_id=estimate.id) }}" 
+                                   class="btn btn-sm btn-outline-success" title="Download PDF">
+                                    <i data-feather="download"></i>
+                                </a>
+                                <a href="{{ url_for('duplicate_estimate', estimate_id=estimate.id) }}" 
+                                   class="btn btn-sm btn-outline-secondary" title="Duplicate">
+                                    <i data-feather="copy"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Stats -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-secondary border-0 text-center">
+            <div class="card-body">
+                <h3 class="text-primary">{{ estimates|length }}</h3>
+                <p class="text-muted mb-0">Total Estimates</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-secondary border-0 text-center">
+            <div class="card-body">
+                <h3 class="text-success">${{ "%.0f"|format(estimates|sum(attribute='grand_total')) }}</h3>
+                <p class="text-muted mb-0">Total Value</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-secondary border-0 text-center">
+            <div class="card-body">
+                {% set total_area = estimates|map('get_areas')|map('sum', attribute='area_ft2')|sum %}
+                <h3 class="text-info">{{ "%.0f"|format(total_area) }}</h3>
+                <p class="text-muted mb-0">Total Sq Ft</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-secondary border-0 text-center">
+            <div class="card-body">
+                {% set avg_total = (estimates|sum(attribute='grand_total') / estimates|length) if estimates else 0 %}
+                <h3 class="text-warning">${{ "%.0f"|format(avg_total) }}</h3>
+                <p class="text-muted mb-0">Average Value</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="text-center py-5">
+    <div class="card bg-secondary border-0 shadow">
+        <div class="card-body py-5">
+            <i data-feather="file-plus" class="text-muted mb-3" style="width: 64px; height: 64px;"></i>
+            <h3 class="text-muted">No Estimates Yet</h3>
+            <p class="text-muted mb-4">
+                Get started by creating your first construction estimate. 
+                Upload blueprint and cost data to generate professional proposals in seconds.
+            </p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                <i data-feather="plus-circle" class="me-2"></i>
+                Create First Estimate
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add sorting functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers for table headers (future enhancement)
+    const headers = document.querySelectorAll('thead th');
+    headers.forEach(header => {
+        if (header.textContent.trim() !== 'Actions') {
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function() {
+                // Sort functionality could be implemented here
+                console.log('Sort by:', this.textContent);
+            });
+        }
+    });
+});
+
+// Confirm delete actions
+document.querySelectorAll('form[action*="delete_estimate"]').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        if (!confirm('Are you sure you want to delete this estimate? This action cannot be undone.')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

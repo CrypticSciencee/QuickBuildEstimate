@@ -1,0 +1,45 @@
+Create a React/Bolt.new app called "QuickBuild Estimate" for custom home builders.
+
+### 1. Project Overview
+- Single-screen workflow: upload PDF blueprint + materials.csv + labor.csv → bank-ready estimate.
+- Use GPT‑4o Vision for blueprint area takeoff.
+- Use GPT‑4o JSON-mode for CSV schema detection and bundle inference.
+- Cost engine applies layered PSF + unit-item + profit + contingency logic.
+- Output: interactive totals, toggles for bundles, downloadable PDF proposal, and history.
+
+### 2. UI/UX Components
+- **DropZone (x3)**: one for PDF, one for materials.csv, one for labor.csv.
+- **ConfirmModal**: shows detected CSV schema (column→role) for 10s or until user confirms/edits.
+- **TogglePanel**: dynamic switches per bundle detected in materials.csv.
+- **EstimateCard**: shows subtotal, profit% input (default 15), contingency dropdown (Low5/Med10/High15), grand total, “Download Proposal” button.
+- **HistoryTable**: lists past estimates with date, toggles, total, and buttons to download PDF or duplicate.
+
+### 3. Serverless Actions
+- **visionTakeoff.js**: auto-resizes/tiles PDF, calls GPT‑4o vision, returns `{room,category,area_ft2}` JSON.
+- **csvSchemaMap.js**: parses CSV, sends 10-row sample to GPT, receives `{columnRoles,detectedBundles}` JSON.
+- **costEngine.js**: computes totals from areas + selected bundles + cost data + profit/contingency; saves to Bolt DB.
+- **proposalWriter.js**: sends estimate JSON to GPT to draft client-friendly summary, converts to PDF.
+- **nightlyPurge.js**: cron job deletes estimates older than 90 days.
+
+### 4. Auth & Storage
+- Single-admin login with `ADMIN_PASSWORD` env var.
+- File storage and SQLite persistence via Bolt.
+- Data retention: 90 days.
+
+### 5. OpenAI Integration
+- Vision & JSON mapping limited to $50/month (ENV guard).
+- Env variables: `OPENAI_API_KEY`, `ADMIN_PASSWORD`, `OPENAI_SPEND_CAP=50`.
+
+### 6. Styling & Branding
+- Dark theme (like ChatGPT).
+- Primary color: `#1C1C1E`, accent buttons optional.
+- Use Tailwind-like CSS utility classes.
+
+### 7. Acceptance Criteria
+1. Upload PDF + CSVs → estimate visible <15s.
+2. Toggle a bundle → total adjusts accordingly.
+3. Generate PDF proposal with total.
+4. Estimation saves to History.
+5. Files older than 90 days purge automatically.
+
+Implement this step-by-step. Focus on modular components, clear prompts, and token-efficient serverless actions.
